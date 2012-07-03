@@ -1,0 +1,4 @@
+*.pyc
+build/*
+dist/*
+mongomodels.egg-info/*
