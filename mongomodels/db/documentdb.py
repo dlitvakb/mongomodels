@@ -1,4 +1,4 @@
-from .struct.struct_data import is_struct
+from ..struct_data import is_struct
 import pymongo
 
 class DocumentDatabase(object):
@@ -57,7 +57,7 @@ class DocumentDatabase(object):
                     doc[k] = o.from_struct(v)
         return doc
 
-class NotImplementedObjectDatabase(ObjectDatabase):
+class NotImplementedDocumentDatabase(DocumentDatabase):
     def __init__(self):
         raise Exception("A document database should be set for this model")
 

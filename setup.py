@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name="mongomodels",
@@ -10,7 +10,7 @@ setup(
     author_email = "david.litvakb@gmail.com",
     license = "GPL v3",
     keywords = "MongoDB ORM Database",
-    packages=['mongomodels'],
+    packages=find_packages(),
     include_package_data=True,
     install_requires=[
       'pymongo'

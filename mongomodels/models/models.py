@@ -1,4 +1,4 @@
-from .struct.struct_data import Struct
+from ..struct_data import Struct
 from hashlib import md5
 from exceptions import ValidationException, NotFoundException
 
