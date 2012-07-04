@@ -1,15 +1,19 @@
 from ..struct_data import Struct
+from ..db import NotImplementedDocumentDatabase
+from ..util import CamelCaseConverter
 from hashlib import md5
 from exceptions import ValidationException, NotFoundException
 
 
 class SelfSavingStruct(Struct):
 
+    __DOCUMENT_DB__ = NotImplementedDocumentDatabase()
+
     def save(self):
         if not self.verify_id():
             self.create_id()
         self.pre_save()
-        saved = bool(self.__OBJECT_DB__.set_doc(
+        saved = bool(self.__DOCUMENT_DB__.set_doc(
                                           self.__DOCUMENT_NAME__,
                                           self.to_struct()
                                         ))
@@ -18,7 +22,7 @@ class SelfSavingStruct(Struct):
 
     def delete(self):
         self.pre_delete()
-        deleted = bool(self.__OBJECT_DB__.delete_doc(
+        deleted = bool(self.__DOCUMENT_DB__.delete_doc(
                                             self.__DOCUMENT_NAME__,
                                             self.to_struct(),
                                             self.__class__
@@ -47,6 +51,12 @@ class SelfSavingStruct(Struct):
                       ))).hexdigest()
 
     @classmethod
+    def _get_document_name(cls):
+        doc_name = getattr(cls, '__DOCUMENT_NAME__', None)
+        if doc_name is None:
+            return CamelCaseConverter(cls.__name__).convert()
+
+    @classmethod
     def _not_found_exception(cls, params):
         raise NotFoundException(
           '%s not found for the following parameters %r' % (
@@ -57,7 +67,7 @@ class SelfSavingStruct(Struct):
 
     @classmethod
     def all(cls, **params):
-        doc = cls.__OBJECT_DB__.find_docs(cls.__DOCUMENT_NAME__, params)
+        doc = cls.__DOCUMENT_DB__.find_docs(cls.__DOCUMENT_NAME__, params)
         if doc is not None:
             items = []
             for item in doc:
@@ -67,14 +77,14 @@ class SelfSavingStruct(Struct):
 
     @classmethod
     def get(cls, **params):
-        item = cls.__OBJECT_DB__.get_doc(cls.__DOCUMENT_NAME__, params)
+        item = cls.__DOCUMENT_DB__.get_doc(cls.__DOCUMENT_NAME__, params)
         if item is not None:
             return cls(**item)
         cls._not_found_exception(params)
 
     @classmethod
     def teardown(cls):
-        return cls.__OBJECT_DB__.teardown(cls.__DOCUMENT_NAME__)
+        return cls.__DOCUMENT_DB__.teardown(cls.__DOCUMENT_NAME__)
 
 
 class ValidatingStruct(SelfSavingStruct):

@@ -1,1 +1,1 @@
-from documentdb import DocumentDatabase
+from documentdb import DocumentDatabase, NotImplementedDocumentDatabase

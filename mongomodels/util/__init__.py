@@ -1,0 +1,1 @@
+from camel_case import CamelCaseConverter

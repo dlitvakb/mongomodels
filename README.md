@@ -13,16 +13,19 @@ from mongomodels.db import DocumentDatabase
 from mongomodels.models import ValidatingStruct
 
 class BaseModel(ValidatingStruct):
-    __OBJECT_DB__ = DocumentDatabase('localhost', 'test_database')
+    __DOCUMENT_DB__ = DocumentDatabase('localhost', 'test_database')
 ```
 
 ### Define your models
 Each model must have a document name, so that the it refers to the proper
-collection on MongoDB.
+collection on MongoDB. By default it takes the snake_case version of the class.
+
 
 ```python
-class MyTestModel(BaseModel):
-    __DOCUMENT_NAME__ = 'test_model' # This is the only thing required
+class MyTestModel(BaseModel): # This would map to __DOCUMENT_NAME__ = 'my_test_model'
+    pass
+    # Or you could redefine your document name
+    # __DOCUMENT_NAME__ = 'test_model'
 ```
 
 ### Create your objects
@@ -50,8 +53,6 @@ MyTestModel.get(some_attribute='some value') # Returns the first object
 # Let's say we have some Message model that relates to a User and a chat Room
 
 class Message(BaseModel): # Our previously defined BaseModel
-
-    __DOCUMENT_NAME__ = 'message'
 
     def validate(self):
         self.validate_not_empty('message')
