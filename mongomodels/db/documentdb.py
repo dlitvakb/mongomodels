@@ -62,5 +62,8 @@ class DocumentDatabase(object):
 
 class NotImplementedDocumentDatabase(DocumentDatabase):
     def __init__(self):
+        pass
+
+    def __getattribute__(self, name):
         raise Exception("A document database should be set for this model")
 
