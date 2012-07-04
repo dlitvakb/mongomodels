@@ -4,12 +4,12 @@ from setuptools import setup, find_packages
 
 setup(
     name="mongomodels",
-    version="0.1.2",
-    description="A simple ORM for MongoDB",
+    version="0.1.3",
+    description="A simple ODM for MongoDB",
     author="David Litvak",
     author_email = "david.litvakb@gmail.com",
     license = "GPL v3",
-    keywords = "MongoDB ORM Database",
+    keywords = "MongoDB ODM Database",
     packages=find_packages(),
     include_package_data=True,
     install_requires=[

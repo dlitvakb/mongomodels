@@ -1,6 +1,6 @@
 # mongomodels
 
-*A simple ORM for MongoDB*
+*A simple ODM for MongoDB*
 
 ## Installation
 `pip install mongomodels`
