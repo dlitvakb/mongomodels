@@ -10,7 +10,7 @@ Define your base model to refer to the mongo instance
 
 ```python
 from mongomodels.db import DocumentDatabase
-from mogomodels.models import ValidatingStruct
+from mongomodels.models import ValidatingStruct
 
 class BaseModel(ValidatingStruct):
     __OBJECT_DB__ = DocumentDatabase('localhost', 'test_database')
