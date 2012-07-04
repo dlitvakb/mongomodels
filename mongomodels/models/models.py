@@ -14,7 +14,7 @@ class SelfSavingStruct(Struct):
             self.create_id()
         self.pre_save()
         saved = bool(self.__DOCUMENT_DB__.set_doc(
-                                          self.__DOCUMENT_NAME__,
+                                          self.__class__._get_document_name(),
                                           self.to_struct()
                                         ))
         self.post_save(saved)
@@ -22,11 +22,13 @@ class SelfSavingStruct(Struct):
 
     def delete(self):
         self.pre_delete()
-        deleted = bool(self.__DOCUMENT_DB__.delete_doc(
-                                            self.__DOCUMENT_NAME__,
-                                            self.to_struct(),
-                                            self.__class__
-                                          ))
+        deleted = bool(
+                    self.__DOCUMENT_DB__.delete_doc(
+                                           self.__class__._get_document_name(),
+                                           self.to_struct(),
+                                           self.__class__
+                                         )
+                  )
         self.post_delete(deleted)
         return self, deleted
 
@@ -67,7 +69,7 @@ class SelfSavingStruct(Struct):
 
     @classmethod
     def all(cls, **params):
-        doc = cls.__DOCUMENT_DB__.find_docs(cls.__DOCUMENT_NAME__, params)
+        doc = cls.__DOCUMENT_DB__.find_docs(cls._get_document_name(), params)
         if doc is not None:
             items = []
             for item in doc:
@@ -77,14 +79,14 @@ class SelfSavingStruct(Struct):
 
     @classmethod
     def get(cls, **params):
-        item = cls.__DOCUMENT_DB__.get_doc(cls.__DOCUMENT_NAME__, params)
+        item = cls.__DOCUMENT_DB__.get_doc(cls._get_document_name(), params)
         if item is not None:
             return cls(**item)
         cls._not_found_exception(params)
 
     @classmethod
     def teardown(cls):
-        return cls.__DOCUMENT_DB__.teardown(cls.__DOCUMENT_NAME__)
+        return cls.__DOCUMENT_DB__.teardown(cls._get_document_name())
 
 
 class ValidatingStruct(SelfSavingStruct):
