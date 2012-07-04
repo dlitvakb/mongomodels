@@ -53,9 +53,6 @@ class Message(BaseModel): # Our previously defined BaseModel
 
     __DOCUMENT_NAME__ = 'message'
 
-    def __init__(self, **kwargs):
-        super(Message, self).__init__(**kwargs)
-
     def validate(self):
         self.validate_not_empty('message')
         self.validate_not_empty('user_id')
