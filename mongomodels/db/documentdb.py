@@ -13,7 +13,6 @@ class DocumentDatabase(object):
         for k, v in doc.items():
             if k != '_id' and is_struct(v):
                 doc[k] = v.to_struct()
-        #print(str(doc))
         collection.save(doc)
 
     def update_doc(self, coll_name, spec, doc, upsert=True):
@@ -56,6 +55,10 @@ class DocumentDatabase(object):
                     o = struct_class()
                     doc[k] = o.from_struct(v)
         return doc
+
+    def teardown(self, coll_name):
+        return bool(self.db[coll_name].remove())
+
 
 class NotImplementedDocumentDatabase(DocumentDatabase):
     def __init__(self):

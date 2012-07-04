@@ -9,14 +9,33 @@ class SelfSavingStruct(Struct):
         if not self.verify_id():
             self.create_id()
         self.pre_save()
-        self.__OBJECT_DB__.set_doc(self.__DOCUMENT_NAME__, self.to_struct())
-        self.post_save()
-        return self
+        saved = bool(self.__OBJECT_DB__.set_doc(
+                                          self.__DOCUMENT_NAME__,
+                                          self.to_struct()
+                                        ))
+        self.post_save(saved)
+        return self, saved
+
+    def delete(self):
+        self.pre_delete()
+        deleted = bool(self.__OBJECT_DB__.delete_doc(
+                                            self.__DOCUMENT_NAME__,
+                                            self.to_struct(),
+                                            self.__class__
+                                          ))
+        self.post_delete(deleted)
+        return self, deleted
 
     def pre_save(self):
         pass
 
-    def post_save(self):
+    def post_save(self, saved):
+        pass
+
+    def pre_delete(self):
+        pass
+
+    def post_delete(self, deleted):
         pass
 
     def verify_id(self):
@@ -52,6 +71,10 @@ class SelfSavingStruct(Struct):
         if item is not None:
             return cls(**item)
         cls._not_found_exception(params)
+
+    @classmethod
+    def teardown(cls):
+        return cls.__OBJECT_DB__.teardown(cls.__DOCUMENT_NAME__)
 
 
 class ValidatingStruct(SelfSavingStruct):
