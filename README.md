@@ -80,6 +80,6 @@ in which we will set all our pre save validations.
                         on the relationship model
 
 **validate_field**: Validates the given field with a custom function,
-                    the function sould receive only *one* argument representing
-                    the value to validate and should return a boolean. Also,
-                    accepts an optional error message.
+                    the function should receive only *one* argument
+                    representing the value to validate and should
+                    return a boolean. Also, accepts an optional error message.
