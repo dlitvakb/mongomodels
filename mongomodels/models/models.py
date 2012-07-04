@@ -42,15 +42,15 @@ class SelfSavingStruct(Struct):
         if doc is not None:
             items = []
             for item in doc:
-                items.append(cls(**item).to_struct())
+                items.append(cls(**item))
             return items
         cls._not_found_exception(params)
 
     @classmethod
     def get(cls, **params):
-        doc = cls.__OBJECT_DB__.get_doc(cls.__DOCUMENT_NAME__, params)
-        if doc is not None:
-            return cls(**doc).to_struct()
+        item = cls.__OBJECT_DB__.get_doc(cls.__DOCUMENT_NAME__, params)
+        if item is not None:
+            return cls(**item)
         cls._not_found_exception(params)
 
 
@@ -66,7 +66,7 @@ class ValidatingStruct(SelfSavingStruct):
     def validate(self):
         pass
 
-    def validate_field(self, field_name, validation_fn, exc_message):
+    def validate_field(self, field_name, validation_fn, exc_message=''):
         if not validation_fn(self.__dict__.get(field_name, None)):
             raise ValidationException(exc_message)
 
@@ -80,10 +80,10 @@ class ValidatingStruct(SelfSavingStruct):
                 raise ValidationException('%s already exists' % (
                                            self.__class__.__name__,))
 
-    def validate_existance(self, object_id, object_cls):
+    def validate_existance(self, relationship_field, object_cls):
         try:
-            object_cls.get(_id=object_id)
-        except:
+            object_cls.get(_id=self[relationship_field])
+        except NotFoundException:
             raise ValidationException('%s does not exist for id: %s' % (
-                                        object_cls.__name__, object_id))
+                                        object_cls.__name__, self[relationship_field]))
 
