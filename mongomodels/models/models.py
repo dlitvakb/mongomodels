@@ -69,13 +69,11 @@ class SelfSavingStruct(Struct):
 
     @classmethod
     def all(cls, **params):
-        doc = cls.__DOCUMENT_DB__.find_docs(cls._get_document_name(), params)
-        if doc is not None:
-            items = []
-            for item in doc:
-                items.append(cls(**item))
-            return items
-        cls._not_found_exception(params)
+        documents = cls.__DOCUMENT_DB__.find_docs(cls._get_document_name(), params)
+        documents_as_list = [x for x in documents]
+        if not len(documents_as_list):
+            cls._not_found_exception(params)
+        return [cls(**document) for document in documents_as_list]
 
     @classmethod
     def get(cls, **params):
@@ -108,17 +106,16 @@ class ValidatingStruct(SelfSavingStruct):
     def validate_not_empty(self, field):
         self.validate_field(field, bool, '%s is required' % (field,))
 
-    def validate_unique(self):
-        objects = self.__class__.all(_id=self['_id'])
-        if objects:
-            if objects[0]['_id'] == self['_id']:
-                raise ValidationException('%s already exists' % (
-                                           self.__class__.__name__,))
-
-    def validate_existance(self, relationship_field, object_cls):
+    def validate_existance(self, relationship_field, object_cls, nullable=False):
         try:
             object_cls.get(_id=self[relationship_field])
         except NotFoundException:
+            if nullable:
+                return
             raise ValidationException('%s does not exist for id: %s' % (
                                         object_cls.__name__, self[relationship_field]))
-
+        except KeyError:
+            if nullable:
+                return
+            raise ValidationException('%s does not have the field %s' % (
+                                        object_cls.__name__, relationship_field))
