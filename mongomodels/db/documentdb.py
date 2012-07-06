@@ -1,4 +1,5 @@
 from ..struct_data import is_struct
+from exceptions import NoDocumentDatabaseException
 import pymongo
 
 class DocumentDatabase(object):
@@ -65,5 +66,5 @@ class NotImplementedDocumentDatabase(DocumentDatabase):
         pass
 
     def __getattribute__(self, name):
-        raise Exception("A document database should be set for this model")
+        raise NoDocumentDatabaseException("A document database should be set for this model")
 

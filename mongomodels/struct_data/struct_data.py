@@ -15,7 +15,7 @@ def is_struct(o):
     for c in o.__class__.__bases__:
         if c.__name__ == 'Struct':
             return True
-    return False
+    return o.__class__.__name__ == 'Struct'
 
 def struct_doc(o):
     if is_struct(o):
@@ -24,15 +24,18 @@ def struct_doc(o):
         return o
 
 class Struct(object):
-    match_all = '__ALL__'
+    _match_all = '__ALL__'
     classes = {}
 
     def to_struct(self):
         d = dict(self.__dict__)
-        if self.classes.has_key(self.match_all):
+        if self.classes.has_key(self._match_all):
             keys = d.keys()
         else:
             keys = self.classes.keys()
+            for k, v in d.iteritems():
+                if is_struct(v):
+                    keys.append(k)
         for name in keys:
             if d.get(name, None) != None:
                 if d[name].__class__.__name__ == 'list':
@@ -44,8 +47,8 @@ class Struct(object):
 
     def from_struct(self, d):
         self.__dict__.update(d)
-        if self.classes.has_key(self.match_all):
-            cls = self.classes[self.match_all]
+        if self.classes.has_key(self._match_all):
+            cls = self.classes[self._match_all]
             for name in self.__dict__.keys():
                 a = getattr(self, name, None)
                 if a != None:

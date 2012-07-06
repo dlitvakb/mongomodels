@@ -1,0 +1,2 @@
+class NoDocumentDatabaseException(Exception):
+    pass
