@@ -1,6 +1,7 @@
 from ..struct_data import Struct
 from ..db import NotImplementedDocumentDatabase
 from ..util import CamelCaseConverter
+from ..events import EventListener, EventThrower
 from hashlib import md5
 from exceptions import ValidationException, NotFoundException
 
@@ -48,8 +49,9 @@ class SelfSavingStruct(Struct):
         return '_id' in self.__dict__
 
     def create_id(self):
-        self['_id'] = md5(str(sum(
-                       hash(k) + hash (v) for k, v in self.__dict__.iteritems()
+        self['_id'] = md5(str(sum(hash(k) + hash (v) for k, v
+                          in self.__dict__.iteritems()
+                          if not k.startswith('__')
                       ))).hexdigest()
 
     @classmethod
@@ -119,3 +121,10 @@ class ValidatingStruct(SelfSavingStruct):
                 return
             raise ValidationException('%s does not have the field %s' % (
                                         object_cls.__name__, relationship_field))
+
+
+class EventedValidatingStruct(ValidatingStruct, EventListener, EventThrower):
+    def __init__(self, **kwargs):
+        ValidatingStruct.__init__(self, **kwargs)
+        EventListener.__init__(self)
+        EventThrower.__init__(self)

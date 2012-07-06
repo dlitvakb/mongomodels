@@ -1,1 +1,1 @@
-from models import SelfSavingStruct, ValidatingStruct
+from models import SelfSavingStruct, ValidatingStruct, EventedValidatingStruct

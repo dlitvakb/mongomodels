@@ -33,9 +33,15 @@ class Struct(object):
             keys = d.keys()
         else:
             keys = self.classes.keys()
+            to_pop = []
             for k, v in d.iteritems():
+                if k.startswith('__'):
+                    to_pop.append(k)
+                    continue
                 if is_struct(v):
                     keys.append(k)
+            for popping in to_pop:
+                d.pop(popping)
         for name in keys:
             if d.get(name, None) != None:
                 if d[name].__class__.__name__ == 'list':

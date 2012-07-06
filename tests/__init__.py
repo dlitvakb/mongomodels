@@ -3,3 +3,5 @@ from struct_data.struct_data import StructTest
 from models.self_saving_struct import SelfSavingStructTest
 from models.validating_struct import ValidatingStructTest
 from db.documentdb import DocumentDatabaseTest
+from events.events import EventedTest
+from models.event_validating_struct import EventedModelTest
