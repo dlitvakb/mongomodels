@@ -16,6 +16,7 @@ class DocumentDatabase(object):
                 doc[k] = v.to_struct()
         collection.save(doc)
 
+
     def update_doc(self, coll_name, spec, doc, upsert=True):
         collection = self.db[coll_name]
         for k, v in doc.items():

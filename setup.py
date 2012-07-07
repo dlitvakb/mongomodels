@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="mongomodels",
-    version="0.3.1",
+    version="0.3.2",
     description="A simple ODM for MongoDB",
     author="David Litvak",
     author_email = "david.litvakb@gmail.com",

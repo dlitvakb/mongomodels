@@ -11,27 +11,28 @@ class SelfSavingStruct(Struct):
     __DOCUMENT_DB__ = NotImplementedDocumentDatabase()
 
     def save(self):
+        is_new = False
         if not self.verify_id():
             self.create_id()
+            is_new = True
         self.pre_save()
-        saved = bool(self.__DOCUMENT_DB__.set_doc(
-                                          self.__class__._get_document_name(),
-                                          self.to_struct()
-                                        ))
-        self.post_save(saved)
-        return self, saved
+        self.__DOCUMENT_DB__.set_doc(
+                               self.__class__._get_document_name(),
+                               self.to_struct()
+                             )
+        self.post_save(is_new)
+        return self, is_new
 
     def delete(self):
         self.pre_delete()
-        deleted = bool(
-                    self.__DOCUMENT_DB__.delete_doc(
-                                           self.__class__._get_document_name(),
-                                           self.to_struct(),
-                                           self.__class__
-                                         )
-                  )
-        self.post_delete(deleted)
-        return self, deleted
+        if self.verify_id():
+            self.__DOCUMENT_DB__.delete_doc(
+                                   self.__class__._get_document_name(),
+                                   self.to_struct(),
+                                   self.__class__
+                                 )
+        self.post_delete(self.verify_id())
+        return self, self.verify_id()
 
     def pre_save(self):
         pass
