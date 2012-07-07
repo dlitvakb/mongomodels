@@ -59,6 +59,7 @@ class SelfSavingStruct(Struct):
         doc_name = getattr(cls, '__DOCUMENT_NAME__', None)
         if doc_name is None:
             return CamelCaseConverter(cls.__name__).convert()
+        return doc_name
 
     @classmethod
     def _not_found_exception(cls, params):

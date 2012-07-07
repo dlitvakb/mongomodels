@@ -8,6 +8,11 @@ from mongomodels.db import DocumentDatabase
 class Model(SelfSavingStruct):
     __DOCUMENT_DB__ = DocumentDatabase('localhost', 'test')
 
+
+class OtherModel(Model):
+    __DOCUMENT_NAME__ = 'model'
+
+
 class SelfSavingStructTest(TestCase):
     def test_when_no_database_is_assigned_should_raise_exception_on_action(self):
         document = SelfSavingStruct()
@@ -71,6 +76,18 @@ class SelfSavingStructTest(TestCase):
 
         Model.teardown()
         self.assertRaises(NotFoundException, Model.get)
+
+    def test_two_models_can_point_to_the_same_collections(self):
+        model_1 = Model(foo='bar')
+        model_1.save()
+
+        self.assertEqual(1, len(Model.all()))
+
+        model_2 = OtherModel(bar='baz')
+        model_2.save()
+
+        self.assertEqual(2, len(Model.all()))
+        self.assertEqual(2, len(OtherModel.all()))
 
     def tearDown(self):
         Model.teardown()
