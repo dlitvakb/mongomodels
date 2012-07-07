@@ -1,6 +1,6 @@
 from unittest import TestCase
 from mongomodels.models import EventedValidatingStruct
-from mongomodels.events import EventThrower
+from event_handler.events import EventThrower
 from mongomodels.db import DocumentDatabase
 
 
