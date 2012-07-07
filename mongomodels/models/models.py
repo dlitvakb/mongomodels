@@ -1,7 +1,7 @@
 from ..struct_data import Struct
 from ..db import NotImplementedDocumentDatabase
 from ..util import CamelCaseConverter
-from ..events import EventListener, EventThrower
+from event_handler import EventListener, EventThrower
 from hashlib import md5
 from exceptions import ValidationException, NotFoundException
 
