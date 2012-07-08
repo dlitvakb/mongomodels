@@ -9,6 +9,7 @@ from exceptions import ValidationException, NotFoundException
 class SelfSavingStruct(Struct):
 
     __DOCUMENT_DB__ = NotImplementedDocumentDatabase()
+    __PRIMARY_KEY__ = None
 
     def save(self):
         is_new = False
@@ -50,10 +51,29 @@ class SelfSavingStruct(Struct):
         return '_id' in self.__dict__
 
     def create_id(self):
-        self['_id'] = md5(str(sum(hash(k) + hash (v) for k, v
-                          in self.__dict__.iteritems()
-                          if not k.startswith('__')
-                      ))).hexdigest()
+        self['_id'] = hash(self)
+
+    def __hash__(self):
+        if '_id' in self.__dict__:
+            return self._id
+        h = 0
+        for key, value in self.__dict__.iteritems():
+            if key.startswith('__'):
+                continue
+            elif (isinstance(value, list) or
+                  isinstance(value, dict)):
+                value = str(value)
+            h += hash(key) + hash(value)
+        return h
+
+    def __repr__(self):
+        if self.__PRIMARY_KEY__ is not None:
+            return "<%s - %s: %s>" % (
+                     self.__class__.__name__,
+                     self.__PRIMARY_KEY__,
+                     self[self.__PRIMARY_KEY__]
+            )
+        return super(SelfSavingStruct, self).__repr__()
 
     @classmethod
     def _get_document_name(cls):

@@ -89,5 +89,11 @@ class SelfSavingStructTest(TestCase):
         self.assertEqual(2, len(Model.all()))
         self.assertEqual(2, len(OtherModel.all()))
 
+    def test_a_model_can_have_a_list_as_a_field_value(self):
+        model = Model(foo=['blah', 'bleh'])
+        model.save()
+
+        self.assertTrue(isinstance(Model.get().foo, list))
+
     def tearDown(self):
         Model.teardown()
