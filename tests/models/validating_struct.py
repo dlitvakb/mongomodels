@@ -29,6 +29,25 @@ class ValidatesExistantRelationshipStruct(BaseValidatingModel):
         self.validate_existance('father', ValidatesExistantRelationshipStruct, nullable=self._nullable)
 
 
+class ValueInCollectionValidatingStruct(BaseValidatingModel):
+    def validate(self):
+        self.validate_in('foo', ['baz', 'boo'])
+
+
+class TypeValidatingStruct(BaseValidatingModel):
+    def validate(self):
+        self.validate_type('meaning_of_life', int)
+
+
+class WithoutNullableFieldStruct(BaseValidatingModel):
+    def validate(self):
+        self.validate_type('foo', int)
+
+
+class WithNullableFieldStruct(WithoutNullableFieldStruct):
+    __NULLABLES__ = ['foo']
+
+
 class ValidatingStructTest(TestCase):
     def test_validates_not_empty(self):
         model_1 = ValidatesNotEmptyFieldStruct()
@@ -55,3 +74,25 @@ class ValidatingStructTest(TestCase):
 
         another_model = CustomValidatedStruct(foo='baz')
         another_model.save()
+
+    def test_validates_value_in_collection(self):
+        model = ValueInCollectionValidatingStruct(foo='bar')
+        self.assertRaises(ValidationException, model.save)
+
+        another_model = ValueInCollectionValidatingStruct(foo='baz')
+        another_model.save()
+
+    def test_validates_type(self):
+        model = TypeValidatingStruct(meaning_of_life='bar')
+        self.assertRaises(ValidationException, model.save)
+
+        another_model = TypeValidatingStruct(meaning_of_life=42)
+        another_model.save()
+
+    def test_check_nullables(self):
+        model = WithoutNullableFieldStruct(foo=None)
+        self.assertRaises(ValidationException, model.save)
+
+        another_model = WithNullableFieldStruct(foo=None)
+        another_model.save()
+

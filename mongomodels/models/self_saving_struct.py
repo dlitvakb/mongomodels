@@ -1,9 +1,7 @@
 from ..struct_data import Struct
 from ..db import NotImplementedDocumentDatabase
 from ..util import CamelCaseConverter
-from event_handler import EventListener, EventThrower
-from hashlib import md5
-from exceptions import ValidationException, NotFoundException
+from exceptions import NotFoundException
 
 
 class SelfSavingStruct(Struct):
@@ -58,7 +56,7 @@ class SelfSavingStruct(Struct):
             return self._id
         h = 0
         for key, value in self.__dict__.iteritems():
-            if key.startswith('__'):
+            if key.startswith('_'):
                 continue
             elif (isinstance(value, list) or
                   isinstance(value, dict)):
@@ -110,43 +108,3 @@ class SelfSavingStruct(Struct):
     def teardown(cls):
         return cls.__DOCUMENT_DB__.teardown(cls._get_document_name())
 
-
-class ValidatingStruct(SelfSavingStruct):
-
-    def __init__(self, **kwargs):
-        super(ValidatingStruct, self).__init__(**kwargs)
-        self.update(kwargs)
-
-    def pre_save(self):
-        self.validate()
-
-    def validate(self):
-        pass
-
-    def validate_field(self, field_name, validation_fn, exc_message=''):
-        if not validation_fn(self.__dict__.get(field_name, None)):
-            raise ValidationException(exc_message)
-
-    def validate_not_empty(self, field):
-        self.validate_field(field, bool, '%s is required' % (field,))
-
-    def validate_existance(self, relationship_field, object_cls, nullable=False):
-        try:
-            object_cls.get(_id=self[relationship_field])
-        except NotFoundException:
-            if nullable:
-                return
-            raise ValidationException('%s does not exist for id: %s' % (
-                                        object_cls.__name__, self[relationship_field]))
-        except KeyError:
-            if nullable:
-                return
-            raise ValidationException('%s does not have the field %s' % (
-                                        object_cls.__name__, relationship_field))
-
-
-class EventedValidatingStruct(ValidatingStruct, EventListener, EventThrower):
-    def __init__(self, **kwargs):
-        ValidatingStruct.__init__(self, **kwargs)
-        EventListener.__init__(self)
-        EventThrower.__init__(self)
