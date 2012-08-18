@@ -2,7 +2,30 @@ from ..struct_data import is_struct
 from exceptions import NoDocumentDatabaseException
 import pymongo
 
-class DocumentDatabase(object):
+class DocumentDatabaseBackend(object):
+    def get_collection(self, coll_name):
+        pass
+
+    def set_doc(self, coll_name, doc):
+        pass
+
+    def update_doc(self, coll_name, spec, doc, upsert=True):
+        pass
+
+    def get_doc(self, coll_name, fdoc, struct_class = None):
+        pass
+
+    def find_docs(self, coll_name, fdoc = None, struct_class = None):
+        pass
+
+    def delete_doc(self, coll_name, fdoc, struct_class = None):
+        pass
+
+    def teardown(self, coll_name):
+        pass
+
+
+class MongoDatabaseBackend(DocumentDatabaseBackend):
     def __init__(self, mongo_uri, mongo_name):
         self.db = pymongo.Connection(mongo_uri)[mongo_name]
 
@@ -62,7 +85,7 @@ class DocumentDatabase(object):
         return bool(self.db[coll_name].remove())
 
 
-class NotImplementedDocumentDatabase(DocumentDatabase):
+class NotImplementedDocumentDatabase(DocumentDatabaseBackend):
     def __init__(self):
         pass
 

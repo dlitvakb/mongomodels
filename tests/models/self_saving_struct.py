@@ -3,10 +3,10 @@ from unittest import TestCase
 from mongomodels.models import SelfSavingStruct
 from mongomodels.models.exceptions import NotFoundException
 from mongomodels.db.exceptions import NoDocumentDatabaseException
-from mongomodels.db import DocumentDatabase
+from mongomodels.db import MongoDatabaseBackend
 
 class Model(SelfSavingStruct):
-    __DOCUMENT_DB__ = DocumentDatabase('localhost', 'test')
+    __DOCUMENT_DB__ = MongoDatabaseBackend('localhost', 'test')
 
 
 class OtherModel(Model):
