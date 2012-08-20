@@ -7,18 +7,30 @@ class DocumentDatabaseBackend(object):
         pass
 
     def set_doc(self, coll_name, doc):
-        collection = self._get_collection(coll_name)
+        collection = self.get_collection(coll_name)
         self._serialize(doc)
         collection.save(doc)
 
-    def get_doc(self, coll_name, fdoc, struct_class = None):
-        pass
+    def get_doc(self, coll_name, fdoc, struct_class=None):
+        collection = self.get_collection(coll_name)
+        doc = collection.find_one(fdoc)
+        if doc and struct_class:
+            self._unserialize(doc, struct_class)
+        return doc
 
-    def find_docs(self, coll_name, fdoc = None, struct_class = None):
-        pass
+    def find_docs(self, coll_name, fdoc=None, struct_class=None):
+        collection = self.get_collection(coll_name)
+        for doc in collection.find(fdoc):
+            if doc and struct_class:
+                self._unserialize(doc, struct_class)
+            yield doc
 
     def delete_doc(self, coll_name, fdoc, struct_class = None):
-        pass
+        collection = self.get_collection(coll_name)
+        doc = collection.remove(fdoc)
+        if doc and struct_class:
+            self._unserialize(doc, struct_class)
+        return doc
 
     def teardown(self, coll_name):
         pass
@@ -32,6 +44,12 @@ class DocumentDatabaseBackend(object):
                     if k2 != '_id' and is_struct(v2):
                         v[k2] = v2.to_struct()
 
+    def _unserialize(self, doc, struct_class):
+        for k, v in doc.items():
+            if k != '_id':
+                o = struct_class()
+                doc[k] = o.from_struct(v)
+
     def _get_collection(self, collection_name):
         pass
 
@@ -44,6 +62,15 @@ class MemoryCollection(list):
         super(MemoryCollection, self).__init__()
         self.__DATABASE__ = db
         self.__NAME__ = name
+
+    def find_one(self, find_doc):
+        pass
+
+    def find(self, find_doc):
+        pass
+
+    def remove(self, find_doc):
+        pass
 
     def save(self, doc):
         to_update = None
@@ -66,8 +93,8 @@ class MemoryDatabaseBackend(DocumentDatabaseBackend):
         super(MemoryDatabaseBackend, self).__init__()
         self.__CONTENT__ = MemoryDatabase()
 
-    def _get_collection(self, collection_name):
-        return self.__CONTENT__.get(collection_name, MemoryCollection(self.__CONTENT__, collection_name))
+    def get_collection(self, coll_name):
+        return self.__CONTENT__.get(coll_name, MemoryCollection(self.__CONTENT__, coll_name))
 
     def get_contents(self):
         return self.__CONTENT__
@@ -82,39 +109,6 @@ class MongoDatabaseBackend(DocumentDatabaseBackend):
 
     def get_collection(self, coll_name):
         return self.db[coll_name]
-
-    def _get_collection(self, collection_name):
-        return self.db[collection_name]
-
-    def get_doc(self, coll_name, fdoc, struct_class = None):
-        collection = self.db[coll_name]
-        doc = collection.find_one(fdoc)
-        if doc and struct_class:
-            for k, v in doc.items():
-                if k != '_id':
-                    o = struct_class()
-                    doc[k] = o.from_struct(v)
-        return doc
-
-    def find_docs(self, coll_name, fdoc = None, struct_class = None):
-        collection = self.db[coll_name]
-        for doc in collection.find(fdoc):
-            if doc and struct_class:
-                for k, v in doc.items():
-                    if k != '_id':
-                        o = struct_class()
-                        doc[k] = o.from_struct(v)
-            yield doc
-
-    def delete_doc(self, coll_name, fdoc, struct_class = None):
-        collection = self.db[coll_name]
-        doc = collection.remove(fdoc)
-        if doc and struct_class:
-            for k, v in doc.items():
-                if k != '_id':
-                    o = struct_class()
-                    doc[k] = o.from_struct(v)
-        return doc
 
     def teardown(self, coll_name):
         return bool(self.db[coll_name].remove())
