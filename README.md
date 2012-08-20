@@ -9,11 +9,11 @@
 Define your base model to refer to the mongo instance
 
 ```python
-from mongomodels.db import DocumentDatabase
+from mongomodels.db import MongoDatabaseBackend
 from mongomodels.models import ValidatingStruct
 
 class BaseModel(ValidatingStruct):
-    __DOCUMENT_DB__ = DocumentDatabase('localhost', 'test_database')
+    __DOCUMENT_DB__ = MongoDatabaseBackend('localhost', 'test_database')
 ```
 
 ### Define your models
