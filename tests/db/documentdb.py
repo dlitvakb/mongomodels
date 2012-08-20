@@ -30,6 +30,18 @@ class MemoryDatabaseBackendTest(TestCase):
 
         self.assertEquals({'foo':[{'_id':'1','bar':'baz'}]}, self.db.get_contents())
 
+    def test_get_doc(self):
+        self.db.set_doc('foo', {'_id':'1', 'bar':'baz'})
+
+        self.assertEquals({'_id':'1','bar':'baz'}, self.db.get_doc('foo', {}))
+        self.assertEquals({'_id':'1','bar':'baz'}, self.db.get_doc('foo', {'_id':'1'}))
+
+    def test_find_docs(self):
+        self.db.set_doc('foo', {'_id':'1', 'bar':'baz'})
+
+        self.assertEquals({'_id':'1','bar':'baz'}, self.db.find_docs('foo', {}).next())
+        self.assertEquals({'_id':'1','bar':'baz'}, self.db.find_docs('foo', {'_id':'1'}).next())
+
     def tearDown(self):
-        self.db.teardown()
+        self.db.clean()
 

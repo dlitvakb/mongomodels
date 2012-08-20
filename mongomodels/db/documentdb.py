@@ -63,14 +63,32 @@ class MemoryCollection(list):
         self.__DATABASE__ = db
         self.__NAME__ = name
 
+    def _search(self, find_doc, document):
+        for key, value in find_doc.iteritems():
+            if document[key] != value:
+                return False
+        return True
+
+
     def find_one(self, find_doc):
-        pass
+        for document in self:
+            if self._search(find_doc, document):
+                return document
 
     def find(self, find_doc):
-        pass
+        for document in self:
+            if self._search(find_doc, document):
+                yield document
 
     def remove(self, find_doc):
-        pass
+        delete_index = None
+        for index, document in self:
+            if self._search(find_doc, document):
+                delete_index = index
+                break
+        if delete_index:
+            return self.pop(delete_index)
+        return None
 
     def save(self, doc):
         to_update = None
@@ -99,7 +117,11 @@ class MemoryDatabaseBackend(DocumentDatabaseBackend):
     def get_contents(self):
         return self.__CONTENT__
 
-    def teardown(self):
+    def teardown(self, coll_name):
+        self.__CONTENT__[coll_name] = MemoryCollection()
+        return True
+
+    def clean(self):
         self.__CONTENT__ = MemoryDatabase()
 
 
