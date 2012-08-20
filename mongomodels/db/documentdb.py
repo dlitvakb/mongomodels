@@ -73,7 +73,7 @@ class MemoryDatabaseBackend(DocumentDatabaseBackend):
         return self.__CONTENT__
 
     def teardown(self):
-        self.__CONTENT__ = {}
+        self.__CONTENT__ = MemoryDatabase()
 
 
 class MongoDatabaseBackend(DocumentDatabaseBackend):
