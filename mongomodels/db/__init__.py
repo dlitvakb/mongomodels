@@ -1,1 +1,1 @@
-from documentdb import MongoDatabaseBackend, MemoryDatabaseBackend, NotImplementedDocumentDatabase
+from documentdb import MongoDatabaseBackend, MemoryDatabaseBackend, DocumentDatabaseBackend

@@ -1,15 +1,15 @@
 from unittest import TestCase
 
-from mongomodels.db import NotImplementedDocumentDatabase, MemoryDatabaseBackend
+from mongomodels.db import DocumentDatabaseBackend, MemoryDatabaseBackend
 from mongomodels.db.exceptions import NoDocumentDatabaseException
 
 
 class DocumentDatabaseTest(TestCase):
     def test_not_implemented_will_raise_exception_on_any_call(self):
-        not_implemented_db = NotImplementedDocumentDatabase()
+        not_implemented_db = DocumentDatabaseBackend()
 
         try:
-            not_implemented_db.fruta()
+            not_implemented_db.get_doc('foo', {})
             self.fail()
         except NoDocumentDatabaseException:
             pass

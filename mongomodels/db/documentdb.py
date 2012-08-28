@@ -5,7 +5,7 @@ import pymongo
 
 class DocumentDatabaseBackend(object):
     def get_collection(self, coll_name):
-        pass
+        raise NoDocumentDatabaseException("A document database should be set for this model")
 
     def set_doc(self, coll_name, doc):
         collection = self.get_collection(coll_name)
@@ -34,7 +34,7 @@ class DocumentDatabaseBackend(object):
         return doc
 
     def teardown(self, coll_name):
-        pass
+        raise NoDocumentDatabaseException("A document database should be set for this model")
 
     def _serialize(self, document):
         for k, v in document.items():
@@ -130,12 +130,3 @@ class MongoDatabaseBackend(DocumentDatabaseBackend):
 
     def teardown(self, coll_name):
         return bool(self.db[coll_name].remove())
-
-
-class NotImplementedDocumentDatabase(DocumentDatabaseBackend):
-    def __init__(self):
-        pass
-
-    def __getattribute__(self, name):
-        raise NoDocumentDatabaseException("A document database should be set for this model")
-

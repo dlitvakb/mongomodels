@@ -1,12 +1,12 @@
 from ..struct_data import Struct
-from ..db import NotImplementedDocumentDatabase
+from ..db import DocumentDatabaseBackend
 from ..util import CamelCaseConverter
 from exceptions import NotFoundException
 
 
 class SelfSavingStruct(Struct):
 
-    __DOCUMENT_DB__ = NotImplementedDocumentDatabase()
+    __DOCUMENT_DB__ = DocumentDatabaseBackend()
     __PRIMARY_KEY__ = None
 
     def save(self):
