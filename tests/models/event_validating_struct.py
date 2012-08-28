@@ -1,11 +1,11 @@
 from unittest import TestCase
 from mongomodels.models import EventedValidatingStruct
 from event_handler.events import EventThrower
-from mongomodels.db import MongoDatabaseBackend
+from mongomodels.db import MemoryDatabaseBackend
 
 
 class MyEventedModel(EventedValidatingStruct):
-    __DOCUMENT_DB__ = MongoDatabaseBackend('localhost', 'test')
+    __DOCUMENT_DB__ = MemoryDatabaseBackend()
 
     def listen_something(self, *args, **kwargs):
         self.foo = 'bar'

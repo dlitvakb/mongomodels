@@ -1,10 +1,10 @@
 from unittest import TestCase
-from mongomodels.db import MongoDatabaseBackend
+from mongomodels.db import MemoryDatabaseBackend
 from mongomodels.models import ValidatingStruct
 from mongomodels.models.exceptions import ValidationException
 
 class BaseValidatingModel(ValidatingStruct):
-    __DOCUMENT_DB__ = MongoDatabaseBackend('localhost', 'test')
+    __DOCUMENT_DB__ = MemoryDatabaseBackend()
 
 
 class ValidatesNotEmptyFieldStruct(BaseValidatingModel):

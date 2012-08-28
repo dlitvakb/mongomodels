@@ -2,6 +2,7 @@ from ..struct_data import is_struct
 from exceptions import NoDocumentDatabaseException
 import pymongo
 
+
 class DocumentDatabaseBackend(object):
     def get_collection(self, coll_name):
         pass
@@ -15,21 +16,21 @@ class DocumentDatabaseBackend(object):
         collection = self.get_collection(coll_name)
         doc = collection.find_one(fdoc)
         if doc and struct_class:
-            self._unserialize(doc, struct_class)
+            return struct_class(**doc)
         return doc
 
     def find_docs(self, coll_name, fdoc=None, struct_class=None):
         collection = self.get_collection(coll_name)
         for doc in collection.find(fdoc):
             if doc and struct_class:
-                self._unserialize(doc, struct_class)
+                yield struct_class(**doc)
             yield doc
 
     def delete_doc(self, coll_name, fdoc, struct_class = None):
         collection = self.get_collection(coll_name)
         doc = collection.remove(fdoc)
         if doc and struct_class:
-            self._unserialize(doc, struct_class)
+            return struct_class(**doc)
         return doc
 
     def teardown(self, coll_name):
@@ -44,14 +45,9 @@ class DocumentDatabaseBackend(object):
                     if k2 != '_id' and is_struct(v2):
                         v[k2] = v2.to_struct()
 
-    def _unserialize(self, doc, struct_class):
-        for k, v in doc.items():
-            if k != '_id':
-                o = struct_class()
-                doc[k] = o.from_struct(v)
-
     def _get_collection(self, collection_name):
         pass
+
 
 class MemoryDatabase(dict):
     pass
@@ -82,11 +78,11 @@ class MemoryCollection(list):
 
     def remove(self, find_doc):
         delete_index = None
-        for index, document in self:
+        for index, document in enumerate(self):
             if self._search(find_doc, document):
                 delete_index = index
                 break
-        if delete_index:
+        if delete_index is not None:
             return self.pop(delete_index)
         return None
 
@@ -118,7 +114,7 @@ class MemoryDatabaseBackend(DocumentDatabaseBackend):
         return self.__CONTENT__
 
     def teardown(self, coll_name):
-        self.__CONTENT__[coll_name] = MemoryCollection()
+        self.__CONTENT__[coll_name] = MemoryCollection(self.__CONTENT__, coll_name)
         return True
 
     def clean(self):
