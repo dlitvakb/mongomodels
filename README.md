@@ -16,6 +16,16 @@ class BaseModel(ValidatingStruct):
     __DOCUMENT_DB__ = MongoDatabaseBackend('localhost', 'test_database')
 ```
 
+* For development purposes you can use an *In-Memory* document database
+
+```python
+from mongomodels.db import MemoryDatabaseBackend
+from mongomodels.models import ValidatingStruct
+
+class BaseModel(ValidatingStruct):
+    __DOCUMENT_DB__ = MemoryDatabaseBackend()
+```
+
 ### Define your models
 Each model must have a document name, so that the it refers to the proper
 collection on MongoDB. By default it takes the snake_case version of the class.
