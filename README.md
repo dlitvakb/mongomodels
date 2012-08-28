@@ -93,3 +93,10 @@ in which we will set all our pre save validations.
                     the function should receive only *one* argument
                     representing the value to validate and should
                     return a boolean. Also, accepts an optional error message.
+
+**validate_in**: Validates that the given field has a value inside the provided
+                 value list.
+
+**validate_type**: Validates that the given field contains an object of the
+                   expected type. **Valid Types**: Any kind of Struct (models),
+                   strings, integers, floats, lists and dictionaries.
