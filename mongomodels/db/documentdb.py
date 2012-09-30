@@ -58,6 +58,26 @@ class Searchable(object):
                 return False
         return True
 
+    def find_one(self, find_doc):
+        for document in self.get_all():
+            if self._search(find_doc, self.clean_document(document)):
+                return self.clean_document(document)
+
+    def find(self, find_doc):
+        for document in self.get_all():
+            if self._search(find_doc, self.clean_document(document)):
+                yield self.clean_document(document)
+
+    def remove(self, find_doc):
+        delete_index = None
+        for index, document in enumerate(self.get_all()):
+            if self._search(find_doc, document):
+                delete_index = index
+                break
+        if delete_index is not None:
+            return self.get_all().pop(delete_index)
+        return None
+
 
 class MemoryCollection(list, Searchable):
     def __init__(self, db, name):
@@ -65,40 +85,26 @@ class MemoryCollection(list, Searchable):
         self.__DATABASE__ = db
         self.__NAME__ = name
 
-    def find_one(self, find_doc):
-        for document in self:
-            if self._search(find_doc, document):
-                return document
+    def get_all(self):
+        return self
 
-    def find(self, find_doc):
-        for document in self:
-            if self._search(find_doc, document):
-                yield document
-
-    def remove(self, find_doc):
-        delete_index = None
-        for index, document in enumerate(self):
-            if self._search(find_doc, document):
-                delete_index = index
-                break
-        if delete_index is not None:
-            return self.pop(delete_index)
-        return None
+    def clean_document(self, document):
+        return document
 
     def save(self, doc):
         to_update = None
 
-        for index, document in enumerate(self):
+        for index, document in enumerate(self.get_all()):
             if document['_id'] == doc['_id']:
                 to_update = index
                 break
 
         if to_update:
-            self.pop(to_update)
+            self.get_all().pop(to_update)
 
-        self.append(doc)
+        self.get_all().append(doc)
 
-        self.__DATABASE__[self.__NAME__] = self
+        self.__DATABASE__[self.__NAME__] = self.get_all()
 
 
 class MemoryDatabaseBackend(DocumentDatabaseBackend):
@@ -138,38 +144,18 @@ class CouchDatabaseCollection(Searchable):
     def get_all(self):
         return self.__COLLECTION__.view('_all_docs', include_docs=True)
 
-    def clean_doc(self, doc):
-        clean = {}
-        doc.pop('_rev')
-        for k, v in doc.iteritems():
-            clean[k] = v
+    def clean_document(self, document):
+        def as_struct(document):
+            clean = {}
+            for k, v in document.iteritems():
+                clean[k] = v
+            return clean
 
-        return clean
+        return as_struct(document.doc)
 
     def save(self, doc):
         _id = doc.pop('_id')
         self.__COLLECTION__[_id] = doc
-
-    def find(self, find_doc):
-        for document in self.get_all():
-            if self._search(find_doc, document.doc):
-
-                yield self.clean_doc(document.doc)
-
-    def find_one(self, find_doc):
-        for document in self.get_all():
-            if self._search(find_doc, document.doc):
-                return self.clean_doc(document.doc)
-
-    def remove(self, find_doc):
-        delete_index = None
-        for index, document in enumerate(self.get_all()):
-            if self._search(find_doc, document.doc):
-                delete_index = index
-                break
-        if delete_index is not None:
-            return self.pop(delete_index)
-        return None
 
 
 class CouchDatabaseBackend(DocumentDatabaseBackend):

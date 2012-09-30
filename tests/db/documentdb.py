@@ -71,7 +71,13 @@ class CouchDatabaseBackendTest(GenericBackendTest, TestCase):
     def _assert_contents(self, coll_name, contents):
         collection = self.db.get_collection(coll_name)
         documents = collection.get_all()
-        self.assertEquals(contents[0], collection.clean_doc(documents.rows[0].doc))
+        self.assertEquals(contents[0], collection.clean_document(documents.rows[0]))
+
+    def assertEquals(self, expected, expectee, message=None):
+        if isinstance(expectee, dict):
+            if '_rev' in expectee:
+                expectee.pop('_rev')
+        super(CouchDatabaseBackendTest, self).assertEquals(expected, expectee, message)
 
     def tearDown(self):
         self.db.teardown('foo')
