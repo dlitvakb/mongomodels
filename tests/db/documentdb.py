@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from mongomodels.db import DocumentDatabaseBackend, MemoryDatabaseBackend
+from mongomodels.db import DocumentDatabaseBackend, MemoryDatabaseBackend, CouchDatabaseBackend, MongoDatabaseBackend
 from mongomodels.db.exceptions import NoDocumentDatabaseException
 
 
@@ -21,14 +21,10 @@ class DocumentDatabaseTest(TestCase):
             pass
 
 
-class MemoryDatabaseBackendTest(TestCase):
-    def setUp(self):
-        self.db = MemoryDatabaseBackend()
-
+class GenericBackendTest(object):
     def test_set_doc(self):
         self.db.set_doc('foo', {'_id':'1', 'bar':'baz'})
-
-        self.assertEquals({'foo':[{'_id':'1','bar':'baz'}]}, self.db.get_contents())
+        self._assert_contents('foo', [{'_id':'1', 'bar':'baz'}])
 
     def test_get_doc(self):
         self.db.set_doc('foo', {'_id':'1', 'bar':'baz'})
@@ -42,6 +38,40 @@ class MemoryDatabaseBackendTest(TestCase):
         self.assertEquals({'_id':'1','bar':'baz'}, self.db.find_docs('foo', {}).next())
         self.assertEquals({'_id':'1','bar':'baz'}, self.db.find_docs('foo', {'_id':'1'}).next())
 
+
+class MongoDatabaseBackendTest(GenericBackendTest, TestCase):
+    def setUp(self):
+        self.db = MongoDatabaseBackend('localhost', 'test')
+
+    def _assert_contents(self, coll_name, contents):
+        collection = self.db.get_collection(coll_name)
+        cursor = collection.find()
+        self.assertEquals(1, cursor.count())
+        self.assertEquals(contents[0], cursor.next())
+
+    def tearDown(self):
+        self.db.teardown('test')
+
+
+class MemoryDatabaseBackendTest(GenericBackendTest, TestCase):
+    def setUp(self):
+        self.db = MemoryDatabaseBackend()
+
+    def _assert_contents(self, coll_name, contents):
+        self.assertEquals({coll_name:contents}, self.db.get_contents())
+
     def tearDown(self):
         self.db.clean()
 
+
+class CouchDatabaseBackendTest(GenericBackendTest, TestCase):
+    def setUp(self):
+        self.db = CouchDatabaseBackend()
+
+    def _assert_contents(self, coll_name, contents):
+        collection = self.db.get_collection(coll_name)
+        documents = collection.get_all()
+        self.assertEquals(contents[0], collection.clean_doc(documents.rows[0].doc))
+
+    def tearDown(self):
+        self.db.teardown('foo')

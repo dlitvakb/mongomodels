@@ -1,6 +1,7 @@
 from ..struct_data import is_struct
 from exceptions import NoDocumentDatabaseException
 import pymongo
+import couchdb
 
 
 class DocumentDatabaseBackend(object):
@@ -50,18 +51,19 @@ class MemoryDatabase(dict):
     pass
 
 
-class MemoryCollection(list):
-    def __init__(self, db, name):
-        super(MemoryCollection, self).__init__()
-        self.__DATABASE__ = db
-        self.__NAME__ = name
-
+class Searchable(object):
     def _search(self, find_doc, document):
         for key, value in find_doc.iteritems():
             if document[key] != value:
                 return False
         return True
 
+
+class MemoryCollection(list, Searchable):
+    def __init__(self, db, name):
+        super(MemoryCollection, self).__init__()
+        self.__DATABASE__ = db
+        self.__NAME__ = name
 
     def find_one(self, find_doc):
         for document in self:
@@ -127,3 +129,66 @@ class MongoDatabaseBackend(DocumentDatabaseBackend):
 
     def teardown(self, coll_name):
         return bool(self.db[coll_name].remove())
+
+
+class CouchDatabaseCollection(Searchable):
+    def __init__(self, collection):
+        self.__COLLECTION__ = collection
+
+    def get_all(self):
+        return self.__COLLECTION__.view('_all_docs', include_docs=True)
+
+    def clean_doc(self, doc):
+        clean = {}
+        doc.pop('_rev')
+        for k, v in doc.iteritems():
+            clean[k] = v
+
+        return clean
+
+    def save(self, doc):
+        _id = doc.pop('_id')
+        self.__COLLECTION__[_id] = doc
+
+    def find(self, find_doc):
+        for document in self.get_all():
+            if self._search(find_doc, document.doc):
+
+                yield self.clean_doc(document.doc)
+
+    def find_one(self, find_doc):
+        for document in self.get_all():
+            if self._search(find_doc, document.doc):
+                return self.clean_doc(document.doc)
+
+    def remove(self, find_doc):
+        delete_index = None
+        for index, document in enumerate(self.get_all()):
+            if self._search(find_doc, document.doc):
+                delete_index = index
+                break
+        if delete_index is not None:
+            return self.pop(delete_index)
+        return None
+
+
+class CouchDatabaseBackend(DocumentDatabaseBackend):
+    def __init__(self, server=None):
+        if server is None:
+            self.server = couchdb.Server()
+        else:
+            self.server = couchdb.Server(server)
+
+    def get_collection(self, coll_name):
+        try:
+            return CouchDatabaseCollection(self.server[coll_name])
+        except couchdb.ResourceNotFound:
+            return CouchDatabaseCollection(self.server.create(coll_name))
+
+    def teardown(self, coll_name):
+        try:
+            del self.server[coll_name]
+            return True
+        except couchdb.ResourceNotFound:
+            return False
+
