@@ -45,9 +45,6 @@ class DocumentDatabaseBackend(object):
                     if k2 != '_id' and is_struct(v2):
                         v[k2] = v2.to_struct()
 
-    def _get_collection(self, collection_name):
-        pass
-
 
 class MemoryDatabase(dict):
     pass
