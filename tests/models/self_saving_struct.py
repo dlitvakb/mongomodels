@@ -1,4 +1,5 @@
 from unittest import TestCase
+import json
 
 from mongomodels.models import SelfSavingStruct
 from mongomodels.models.exceptions import NotFoundException
@@ -94,6 +95,30 @@ class SelfSavingStructTest(TestCase):
         model.save()
 
         self.assertTrue(isinstance(Model.get().foo, list))
+
+    def test_a_model_has_json_property_that_behaves_like_to_struct(self):
+        model = Model(foo='bar')
+        model.save()
+
+        self.assertEqual(model.json, model.to_struct())
+
+    def test_a_model_has_json_string_property(self):
+        model = Model(foo='bar')
+        model.save()
+
+        self.assertEqual(model.json_string, json.dumps(model.to_struct()))
+
+    def test_all_json(self):
+        model = Model(foo='bar')
+        model.save()
+
+        self.assertEqual(Model.all_json(), [o.json for o in Model.all()])
+
+    def test_all_json_string(self):
+        model = Model(foo='bar')
+        model.save()
+
+        self.assertEqual(Model.all_json_string(), json.dumps([o.json for o in Model.all()]))
 
     def tearDown(self):
         Model.teardown()

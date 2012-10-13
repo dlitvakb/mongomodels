@@ -1,3 +1,5 @@
+import json
+
 from ..struct_data import Struct
 from ..db import DocumentDatabaseBackend
 from ..util import CamelCaseConverter
@@ -8,6 +10,14 @@ class SelfSavingStruct(Struct):
 
     __DOCUMENT_DB__ = DocumentDatabaseBackend()
     __PRIMARY_KEY__ = None
+
+    @property
+    def json(self):
+        return self.to_struct()
+
+    @property
+    def json_string(self):
+        return json.dumps(self.json)
 
     def save(self):
         is_new = False
@@ -99,6 +109,14 @@ class SelfSavingStruct(Struct):
         if not len(documents_as_list):
             cls._not_found_exception(params)
         return [cls(**document) for document in documents_as_list]
+
+    @classmethod
+    def all_json(cls, **params):
+        return [ d.json for d in cls.all(**params) ]
+
+    @classmethod
+    def all_json_string(cls, **params):
+        return json.dumps(cls.all_json(**params))
 
     @classmethod
     def get(cls, **params):

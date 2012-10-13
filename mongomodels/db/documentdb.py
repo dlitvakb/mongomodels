@@ -54,7 +54,7 @@ class MemoryDatabase(dict):
 class Searchable(object):
     def _search(self, find_doc, document):
         for key, value in find_doc.iteritems():
-            if document[key] != value:
+            if not document.has_key(key) or document[key] != value:
                 return False
         return True
 
