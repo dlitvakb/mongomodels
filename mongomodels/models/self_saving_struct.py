@@ -49,7 +49,7 @@ class SelfSavingStruct(Struct):
         return '_id' in self.__dict__
 
     def create_id(self):
-        self['_id'] = hash(self)
+        self['_id'] = str(hash(self))
 
     def __hash__(self):
         if '_id' in self.__dict__:
@@ -71,7 +71,10 @@ class SelfSavingStruct(Struct):
                      self.__PRIMARY_KEY__,
                      self[self.__PRIMARY_KEY__]
             )
-        return super(SelfSavingStruct, self).__repr__()
+        return "<%s - ID: %s>" % (
+                 self.__class__.__name__,
+                 self['_id']
+               )
 
     @classmethod
     def _get_document_name(cls):

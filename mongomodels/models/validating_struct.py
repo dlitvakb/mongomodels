@@ -38,7 +38,9 @@ class ValidatingStruct(SelfSavingStruct):
             if nullable:
                 return
             raise ValidationException('%s does not exist for id: %s' % (
-                                        object_cls.__name__, self[relationship_field]))
+                                        object_cls.__name__,
+                                        self[relationship_field])
+                                     )
         except KeyError:
             if nullable:
                 return
@@ -61,4 +63,15 @@ class ValidatingStruct(SelfSavingStruct):
         if not isinstance(self[field_name], expected_type):
             raise ValidationException('%s is not an instance of %s' % (
               field_name, str(expected_type)))
+
+    def validate_unique(self):
+        try:
+            objects = self.__class__.all(**self.to_struct())
+            if len(objects) > 1:
+                raise ValidationException("%s is not unique" % (
+                                           self.__class__.__name__
+                                          ))
+        except NotFoundException:
+            pass
+
 
