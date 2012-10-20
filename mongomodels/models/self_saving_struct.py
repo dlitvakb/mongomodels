@@ -132,7 +132,7 @@ class SelfSavingStruct(Struct):
 
     @classmethod
     def generate_timestamp(cls):
-        return datetime.utcnow().isostring()[:19]
+        return datetime.utcnow().isoformat()[:19]
 
     @classmethod
     def teardown(cls):
