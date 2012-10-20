@@ -86,6 +86,10 @@ class SelfSavingStruct(Struct):
                      self.__PRIMARY_KEY__,
                      self[self.__PRIMARY_KEY__]
             )
+
+        if '_id' not in self.__dict__:
+            return "<%s - Not Saved>" % (self.__class__.__name__,)
+
         return "<%s - ID: %s>" % (
                  self.__class__.__name__,
                  self['_id']
