@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 
 from ..struct_data import Struct
 from ..db import DocumentDatabaseBackend
@@ -61,6 +62,9 @@ class SelfSavingStruct(Struct):
     def create_id(self):
         self['_id'] = str(hash(self))
 
+    def as_date(self, field):
+        return datetime.strptime(self[field], '%Y-%m-%dT%H:%M:%S')
+
     def __hash__(self):
         if '_id' in self.__dict__:
             return self._id
@@ -71,7 +75,8 @@ class SelfSavingStruct(Struct):
             elif (isinstance(value, list) or
                   isinstance(value, dict)):
                 value = str(value)
-            h += hash(key) + hash(value)
+            h += hash(key) + hash(value) + hash(
+                    self.__class__.generate_timestamp())
         return h
 
     def __repr__(self):
@@ -124,6 +129,10 @@ class SelfSavingStruct(Struct):
         if item is not None:
             return cls(**item)
         cls._not_found_exception(params)
+
+    @classmethod
+    def generate_timestamp(cls):
+        return datetime.utcnow().isostring()[:19]
 
     @classmethod
     def teardown(cls):

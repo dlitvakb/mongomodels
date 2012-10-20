@@ -65,13 +65,14 @@ class ValidatingStruct(SelfSavingStruct):
               field_name, str(expected_type)))
 
     def validate_unique(self):
-        try:
-            objects = self.__class__.all(**self.to_struct())
-            if len(objects) > 1:
-                raise ValidationException("%s is not unique" % (
-                                           self.__class__.__name__
-                                          ))
-        except NotFoundException:
-            pass
+        if self.__PRIMARY_KEY__:
+            try:
+                objects = self.__class__.all(**{self.__PRIMARY_KEY__ : self[self.__PRIMARY_KEY__]})
+                if len(objects) == 1:
+                    raise ValidationException("%s is not unique" % (
+                                               self.__class__.__name__
+                                              ))
+            except NotFoundException:
+                pass
 
 

@@ -48,6 +48,13 @@ class WithNullableFieldStruct(WithoutNullableFieldStruct):
     __NULLABLES__ = ['foo']
 
 
+class ValidateUniqueModel(BaseValidatingModel):
+    __PRIMARY_KEY__ = 'foo'
+
+    def validate(self):
+        self.validate_unique()
+
+
 class ValidatingStructTest(TestCase):
     def test_validates_not_empty(self):
         model_1 = ValidatesNotEmptyFieldStruct()
@@ -95,4 +102,14 @@ class ValidatingStructTest(TestCase):
 
         another_model = WithNullableFieldStruct(foo=None)
         another_model.save()
+
+    def test_validate_unique(self):
+        model = ValidateUniqueModel(foo='bar', bar='baz')
+        model.save()
+
+        fail_model = ValidateUniqueModel(foo='bar')
+        self.assertRaises(ValidationException, fail_model.save)
+
+    def tearDown(self):
+        BaseValidatingModel.__DOCUMENT_DB__.clean()
 
