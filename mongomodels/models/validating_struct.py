@@ -33,7 +33,8 @@ class ValidatingStruct(SelfSavingStruct):
         if self._field_can_be_null(relationship_field) and nullable:
             return
         try:
-            object_cls.get(_id=self[relationship_field])
+            obj = object_cls.get(_id=self[relationship_field])
+            setattr(self, relationship_field.replace('_id', ''), obj)
         except NotFoundException:
             if nullable:
                 return

@@ -55,6 +55,14 @@ class ValidateUniqueModel(BaseValidatingModel):
         self.validate_unique()
 
 
+class User(BaseValidatingModel):
+    pass
+
+
+class ValidateRelationshipAsProperty(BaseValidatingModel):
+    def validate(self):
+        self.validate_existance('user_id', User)
+
 class ValidatingStructTest(TestCase):
     def test_validates_not_empty(self):
         model_1 = ValidatesNotEmptyFieldStruct()
@@ -109,6 +117,15 @@ class ValidatingStructTest(TestCase):
 
         fail_model = ValidateUniqueModel(foo='bar')
         self.assertRaises(ValidationException, fail_model.save)
+
+    def test_relationship_as_a_property(self):
+        user = User()
+        user.save()
+
+        model = ValidateRelationshipAsProperty(user_id=user['_id'])
+        model.save()
+
+        self.assertEquals(user['_id'], model.user['_id'])
 
     def tearDown(self):
         BaseValidatingModel.__DOCUMENT_DB__.clean()
