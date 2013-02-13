@@ -81,3 +81,8 @@ class CouchDatabaseBackendTest(GenericBackendTest, TestCase):
 
     def tearDown(self):
         self.db.teardown('foo')
+
+
+#class OjotaDatabaseBackendTest(GenericBackendTest, TestCase):
+    #def setUp(self):
+        #self.db = OjotaDatabaseBackend()

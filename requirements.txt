@@ -1,2 +1,3 @@
 pymongo
+couchdb
 event_handler
